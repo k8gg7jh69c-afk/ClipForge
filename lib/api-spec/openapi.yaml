@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ClipForge AI video studio API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: dashboard
+  - name: brands
+  - name: ideas
+  - name: videos
+  - name: jobs
+  - name: publishing
+  - name: analytics
+  - name: settings
 paths:
   /healthz:
     get:
@@ -24,7 +32,342 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard overview
+      responses:
+        "200":
+          description: Dashboard overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /brands:
+    get:
+      operationId: listBrands
+      tags: [brands]
+      summary: List brands
+      responses:
+        "200":
+          description: Brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Brand"
+    post:
+      operationId: createBrand
+      tags: [brands]
+      summary: Create a brand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandInput"
+      responses:
+        "201":
+          description: Created brand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Brand"
+  /brands/{id}:
+    patch:
+      operationId: updateBrand
+      tags: [brands]
+      summary: Update a brand
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BrandInput"
+      responses:
+        "200":
+          description: Updated brand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Brand"
+  /ideas:
+    get:
+      operationId: listIdeas
+      tags: [ideas]
+      summary: List content ideas
+      parameters:
+        - $ref: "#/components/parameters/Status"
+      responses:
+        "200":
+          description: Content ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Idea"
+  /ai/ideas:
+    post:
+      operationId: generateIdeas
+      tags: [ideas]
+      summary: Generate original video ideas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IdeaGenerationInput"
+      responses:
+        "201":
+          description: Generated ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Idea"
+  /ai/script:
+    post:
+      operationId: generateScript
+      tags: [videos]
+      summary: Generate a script from an idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScriptGenerationInput"
+      responses:
+        "200":
+          description: Generated script
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Script"
+  /videos:
+    get:
+      operationId: listVideos
+      tags: [videos]
+      summary: List generated videos
+      parameters:
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Videos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Video"
+    post:
+      operationId: createVideo
+      tags: [videos]
+      summary: Start a video generation job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoGenerationInput"
+      responses:
+        "202":
+          description: Video generation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationAccepted"
+  /videos/{id}:
+    get:
+      operationId: getVideo
+      tags: [videos]
+      summary: Get a generated video
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+    patch:
+      operationId: updateVideo
+      tags: [videos]
+      summary: Approve, reject, or regenerate a video
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VideoUpdate"
+      responses:
+        "200":
+          description: Updated video
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Video"
+  /jobs:
+    get:
+      operationId: listJobs
+      tags: [jobs]
+      summary: List recent jobs
+      responses:
+        "200":
+          description: Jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+  /jobs/{id}:
+    get:
+      operationId: getJob
+      tags: [jobs]
+      summary: Get job progress
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+  /publishing:
+    get:
+      operationId: listPosts
+      tags: [publishing]
+      summary: List publishing queue
+      responses:
+        "200":
+          description: Publishing queue
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+    post:
+      operationId: createPost
+      tags: [publishing]
+      summary: Queue or publish a video
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "201":
+          description: Queued post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+  /publishing/{id}:
+    patch:
+      operationId: updatePost
+      tags: [publishing]
+      summary: Reschedule or publish a queued post
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUpdate"
+      responses:
+        "200":
+          description: Updated post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+  /analytics:
+    get:
+      operationId: getAnalytics
+      tags: [analytics]
+      summary: Get performance analytics
+      responses:
+        "200":
+          description: Analytics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Analytics"
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get workspace settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update workspace settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsInput"
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+  /ai/recommendations:
+    post:
+      operationId: getRecommendations
+      tags: [analytics]
+      summary: Generate content recommendations
+      responses:
+        "200":
+          description: Recommendations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recommendations"
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    Status:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +376,253 @@ components:
           type: string
       required:
         - status
+    Brand:
+      type: object
+      required: [id, name, niche, tone, visualStyle, defaultLength]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        niche: { type: string }
+        tone: { type: string }
+        visualStyle: { type: string }
+        defaultLength: { type: integer }
+    BrandInput:
+      type: object
+      required: [name, niche]
+      properties:
+        name: { type: string, minLength: 1 }
+        niche: { type: string, minLength: 1 }
+        tone: { type: string }
+        visualStyle: { type: string }
+        defaultLength: { type: integer, enum: [15, 30, 45, 60] }
+    Idea:
+      type: object
+      required: [id, title, concept, hook, targetAudience, estimatedDuration, status, createdAt]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        concept: { type: string }
+        hook: { type: string }
+        targetAudience: { type: string }
+        estimatedDuration: { type: integer }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+    IdeaGenerationInput:
+      type: object
+      required: [topic]
+      properties:
+        brandId: { type: string }
+        topic: { type: string, minLength: 3 }
+        count: { type: integer, minimum: 1, maximum: 10 }
+    ScriptGenerationInput:
+      type: object
+      required: [idea, niche, duration, tone]
+      properties:
+        idea: { type: string }
+        niche: { type: string }
+        duration: { type: integer }
+        tone: { type: string }
+    Scene:
+      type: object
+      required: [sceneNumber, duration, visualPrompt, narration]
+      properties:
+        sceneNumber: { type: integer }
+        duration: { type: number }
+        visualPrompt: { type: string }
+        narration: { type: string }
+    Script:
+      type: object
+      required: [id, hook, script, scenes]
+      properties:
+        id: { type: string }
+        hook: { type: string }
+        script: { type: string }
+        scenes:
+          type: array
+          items: { $ref: "#/components/schemas/Scene" }
+    VideoGenerationInput:
+      type: object
+      required: [topic, duration, tone, visualStyle]
+      properties:
+        brandId: { type: string }
+        topic: { type: string, minLength: 3 }
+        duration: { type: integer, enum: [15, 30, 45, 60] }
+        tone: { type: string }
+        visualStyle: { type: string }
+        template: { type: string, enum: [kinetic, focus, cinematic] }
+    GenerationAccepted:
+      type: object
+      required: [videoId, jobId]
+      properties:
+        videoId: { type: string }
+        jobId: { type: string }
+    Video:
+      type: object
+      required: [id, title, duration, status, qualityScore, createdAt, thumbnailUrl, progress, topic, template]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        topic: { type: string }
+        duration: { type: integer }
+        status: { type: string }
+        qualityScore: { type: integer }
+        hookScore: { type: integer }
+        clarityScore: { type: integer }
+        originalityScore: { type: integer }
+        captionScore: { type: integer }
+        thumbnailUrl: { type: string }
+        videoUrl: { type: ["string", "null"] }
+        template: { type: string }
+        script: { type: ["string", "null"] }
+        hook: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        progress: { type: integer }
+    VideoUpdate:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [approve, reject, regenerate] }
+    Job:
+      type: object
+      required: [id, type, status, progress, createdAt]
+      properties:
+        id: { type: string }
+        videoId: { type: ["string", "null"] }
+        type: { type: string }
+        status: { type: string }
+        progress: { type: integer }
+        error: { type: ["string", "null"] }
+        createdAt: { type: string, format: date-time }
+        completedAt: { type: ["string", "null"], format: date-time }
+    Post:
+      type: object
+      required: [id, videoId, videoTitle, platform, status, scheduledAt]
+      properties:
+        id: { type: string }
+        videoId: { type: string }
+        videoTitle: { type: string }
+        platform: { type: string }
+        status: { type: string }
+        scheduledAt: { type: ["string", "null"], format: date-time }
+        platformPostId: { type: ["string", "null"] }
+    PostInput:
+      type: object
+      required: [videoId, platform]
+      properties:
+        videoId: { type: string }
+        platform: { type: string, enum: [youtube, tiktok, instagram] }
+        scheduledAt: { type: ["string", "null"], format: date-time }
+    PostUpdate:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [publish, reschedule] }
+        scheduledAt: { type: ["string", "null"], format: date-time }
+    Dashboard:
+      type: object
+      required: [metrics, recentVideos, recentJobs, weeklyViews]
+      properties:
+        metrics:
+          type: object
+          required: [videosCreated, awaitingApproval, published, totalViews, averageViews]
+          properties:
+            videosCreated: { type: integer }
+            awaitingApproval: { type: integer }
+            published: { type: integer }
+            totalViews: { type: integer }
+            averageViews: { type: integer }
+        recentVideos:
+          type: array
+          items: { $ref: "#/components/schemas/Video" }
+        recentJobs:
+          type: array
+          items: { $ref: "#/components/schemas/Job" }
+        weeklyViews:
+          type: array
+          items:
+            type: object
+            required: [label, views]
+            properties:
+              label: { type: string }
+              views: { type: integer }
+    Analytics:
+      type: object
+      required: [summary, viewsOverTime, byTopic, byLength, byHook]
+      properties:
+        summary:
+          type: object
+          required: [views, likes, comments, shares, retention]
+          properties:
+            views: { type: integer }
+            likes: { type: integer }
+            comments: { type: integer }
+            shares: { type: integer }
+            retention: { type: number }
+        viewsOverTime:
+          type: array
+          items:
+            type: object
+            required: [label, views]
+            properties:
+              label: { type: string }
+              views: { type: integer }
+        byTopic:
+          type: array
+          items:
+            type: object
+            required: [label, value]
+            properties:
+              label: { type: string }
+              value: { type: number }
+        byLength:
+          type: array
+          items:
+            type: object
+            required: [label, value]
+            properties:
+              label: { type: string }
+              value: { type: number }
+        byHook:
+          type: array
+          items:
+            type: object
+            required: [label, value]
+            properties:
+              label: { type: string }
+              value: { type: number }
+    Settings:
+      type: object
+      required: [brandName, defaultNiche, defaultTone, defaultLength, defaultVisualStyle, minimumQualityScore, dailyPublishingLimit]
+      properties:
+        brandName: { type: string }
+        defaultNiche: { type: string }
+        defaultTone: { type: string }
+        defaultLength: { type: integer }
+        defaultVisualStyle: { type: string }
+        minimumQualityScore: { type: integer }
+        dailyPublishingLimit: { type: integer }
+    SettingsInput:
+      type: object
+      properties:
+        brandName: { type: string }
+        defaultNiche: { type: string }
+        defaultTone: { type: string }
+        defaultLength: { type: integer, enum: [15, 30, 45, 60] }
+        defaultVisualStyle: { type: string }
+        minimumQualityScore: { type: integer, minimum: 0, maximum: 100 }
+        dailyPublishingLimit: { type: integer, minimum: 1, maximum: 100 }
+    Recommendations:
+      type: object
+      required: [recommendedTopics, recommendedLength, recommendedHookStyles, recommendedVisualStyles]
+      properties:
+        recommendedTopics:
+          type: array
+          items: { type: string }
+        recommendedLength: { type: integer }
+        recommendedHookStyles:
+          type: array
+          items: { type: string }
+        recommendedVisualStyles:
+          type: array
+          items: { type: string }
 
